@@ -213,11 +213,13 @@ public class ResultFetcherServiceImpl implements ResultFetcherService {
         String[] finalResult;                                //stores the array of results
         String[] finalSuggestions;                      //stores the array of suggestions
         Gson gson=new Gson();
+        ProcessedQueryModel queryModel=gson.fromJson(param,ProcessedQueryModel.class);
         List resultObject = resultFetcher(param);
         List<Map> actualResult = (ArrayList) resultObject.get(1);
         List<String> resultList = new ArrayList();
         ProcessedQueryModel processedQueryModel = (ProcessedQueryModel) resultObject.get(2);
         System.out.println("***************"+processedQueryModel.getSessionId());
+        System.out.println("$4"+queryModel.getSessionId());
         for (Map m : actualResult                             //for results
         ) {
             if (!((ArrayList) m.get("value")).isEmpty() || !m.get("value").equals(null)) {
@@ -285,7 +287,7 @@ public class ResultFetcherServiceImpl implements ResultFetcherService {
             resultModel.setSuggestions(finalSuggestions);
             resultModel.setQuery(processedQueryModel.getQuery());
             resultModel.setStatus("noresult");
-            resultModel.setSessionId(processedQueryModel.getSessionId());
+            resultModel.setSessionId(queryModel.getSessionId());
         } else {
             finalResult = new String[resultList.size() + 1];
             finalSuggestions = new String[suggestions.size()];
@@ -304,7 +306,7 @@ public class ResultFetcherServiceImpl implements ResultFetcherService {
             resultModel.setSuggestions(finalSuggestions);
             resultModel.setQuery(processedQueryModel.getQuery());
             resultModel.setStatus("result");
-            resultModel.setSessionId(processedQueryModel.getSessionId());
+            resultModel.setSessionId(queryModel.getSessionId());
         }
         String json = gson.toJson(resultModel);
         kafkaTemplate.send("FinalResult", json);                  //write result to FinalResult topic
